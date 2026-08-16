@@ -1,28 +1,42 @@
-# ▄▀█ █░░ ▄▀█ █▀▄ █▀▄ █ █▄░█ █░█ █▄░█ █ ▀▄▀
-# █▀█ █▄▄ █▀█ █▄▀ █▄▀ █ █░▀█ ▀▀█ █░▀█ █ █░█
-# -- -- -- -- -- -- -- -- -- -- -- -- -- --
-
 {
-  description = ''
-    DPKG version of aladdin-2fa-desktop for nixOS 
-    or any distro if the Nix package manager is installed on it.
-    Official site:
-    https://www.aladdin-rd.ru/catalog/aladdin-2fa/
-  '';
+  description = "Aladdin 2FA Desktop package for Nix";
 
-  inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-  };
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-  outputs = { self, nixpkgs }: 
-  let
-    system = "x86_64-linux";
-    pkgs = import nixpkgs { inherit system; };
-    aladdin4nix = pkgs.callPackage ./aladdin-2fa-desktop {};
-  in {
-    packages.${system} = {
-      aladdin4nix = aladdin4nix.aladdin-2fa-desktop;
-      default = self.packages.x86_64-linux.aladdin4nix;
+  outputs =
+    { nixpkgs, ... }:
+    let
+      system = "x86_64-linux";
+      pkgs = import nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
+      };
+      package = pkgs.callPackage ./default.nix { };
+      app = {
+        type = "app";
+        program = pkgs.lib.getExe package;
+        meta.description = package.meta.description;
+      };
+    in
+    {
+      packages.${system} = {
+        aladdin-2fa-desktop = package;
+        default = package;
+      };
+
+      apps.${system} = {
+        aladdin-2fa-desktop = app;
+        default = app;
+      };
+
+      devShells.${system}.default = pkgs.mkShellNoCC {
+        packages = [
+          pkgs.deadnix
+          pkgs.nixfmt
+          pkgs.statix
+        ];
+      };
+
+      formatter.${system} = pkgs.nixfmt;
     };
-  };
 }

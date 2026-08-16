@@ -1,42 +1,206 @@
 # aladdin4nix
 
-aladdin-2fa-desktop for nixOS or any distro if the Nix package manager is installed on it.
+**A ready-to-use Nix package for Aladdin 2FA Desktop on x86_64 Linux.**
 
-### Aladdin-2fa-desktop [from official site](https://www.aladdin-rd.ru/catalog/aladdin-2fa/)
-Aladdin 2FA
-Solution for PUSH and OTP authentication and management of user mobile authenticators,
-extending the capabilities of the JaCarta Authentication Server (JAS)
+`aladdin4nix` repackages the official Aladdin 2FA Desktop application for
+NixOS and other Linux distributions with the Nix package manager.
 
-You can try the solution in action at [demo portal Aladdin 2FA](https://a2fa-mt.a-rd.ru/)
+<div align="center">
 
-Aladdin 2FA with JaCarta Authentication Server will allow you to implement two-factor authentication scenarios for:
+[![Nix Flakes](https://img.shields.io/badge/Nix-Flakes-5277C3?style=for-the-badge&logo=nixos&logoColor=white&labelColor=101418)][flakes]
+![Platform](https://img.shields.io/badge/Platform-x86__64--linux-blue?style=for-the-badge&logo=linux&logoColor=white&labelColor=101418)
+[![License](https://img.shields.io/badge/License-Unfree-orange?style=for-the-badge&labelColor=101418)][aladdin]
 
-- remote access gateways (Microsoft, Cisco, Citrix, Palo Alto, Check Point, VMware, Fortinet, NGate, etc. - the list is constantly growing);
-- gateways to Microsoft desktops (Microsoft RDG);
-- corporate systems (CRM, portals, email, etc.), including Microsoft SharePoint and Microsoft Outlook Web App;
-- web applications, websites and cloud services;
-- remote banking systems (RBS) and electronic document management.
+</div>
 
-## Problem:
-aladdin-2fa-desktop available for:
-- Android
-- iOS
-- Windows
-- Linux **(x64 only for dpkg or rpm based distro)**
+## Features
 
-If you use the app only to gain access to the corporate segment and
-do not want to install it on your personal phone and your main OS is Linux,
-you will need a dpkg or rpm-based distribution.
+- Packages the official Aladdin 2FA Desktop release.
+- Patches native ELF dependencies without a full FHS environment.
+- Provides an application entry for `nix run`.
+- Installs a desktop entry and application icons.
+- Works on NixOS and other distributions with Nix installed.
+- Includes a reproducible development environment.
 
-In fact, of course, this is not such a problem since such distributions are very common.
+## Quick Start
 
-But if you use Arch, NixOS, Void, etc... you need to adapt the dpkg package
-from the developer to your package manager.
+Run Aladdin 2FA Desktop without installing it:
 
-## Solution:
+```console
+nix run github:MOIS3Y/aladdin4nix
+```
 
-Nix of course :)
+The package is downloaded, built, and started in one command. Nix reuses the
+result from its store on subsequent runs.
 
-Nix is ​​a great tool for adding packages to your system that your distribution doesn't provide.
-Nix is ​​available on most distributions out of the box
-or can be easily installed using [the official script](https://nixos.org/download/#download-nix).
+> [!NOTE]
+> The upstream application is available only for `x86_64-linux`.
+
+## Installation
+
+### Nix Profile
+
+Install the application into your user profile:
+
+```console
+nix profile add github:MOIS3Y/aladdin4nix
+```
+
+After installation, start it from your application menu or terminal:
+
+```console
+aladdin-2fa-desktop
+```
+
+Remove the application from your profile with:
+
+```console
+nix profile remove aladdin4nix
+```
+
+The profile entry is named `aladdin4nix`. You can confirm it with
+`nix profile list`.
+
+### NixOS Flake
+
+Add this repository to your flake inputs and include its default package:
+
+```nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    aladdin4nix.url = "github:MOIS3Y/aladdin4nix";
+  };
+
+  outputs =
+    { nixpkgs, aladdin4nix, ... }:
+    let
+      system = "x86_64-linux";
+    in
+    {
+      nixosConfigurations.hostname = nixpkgs.lib.nixosSystem {
+        inherit system;
+
+        modules = [
+          {
+            environment.systemPackages = [
+              aladdin4nix.packages.${system}.default
+            ];
+          }
+        ];
+      };
+    };
+}
+```
+
+Apply the configuration as usual:
+
+```console
+sudo nixos-rebuild switch --flake .#hostname
+```
+
+### Existing NixOS Configuration
+
+You can also build the package directly from a checked-out repository:
+
+```nix
+{ pkgs, ... }:
+
+{
+  environment.systemPackages = [
+    (pkgs.callPackage /path/to/aladdin4nix/default.nix { })
+  ];
+}
+```
+
+Because the application is proprietary, make sure unfree packages are allowed
+in the Nixpkgs instance used by your configuration:
+
+```nix
+{
+  nixpkgs.config.allowUnfree = true;
+}
+```
+
+## Updating
+
+Update the installed profile package to the latest flake revision:
+
+```console
+nix profile upgrade aladdin4nix
+```
+
+For a NixOS flake configuration, update its locked input and rebuild:
+
+```console
+nix flake update aladdin4nix
+sudo nixos-rebuild switch --flake .#hostname
+```
+
+## Local Usage
+
+Clone the repository and run the local flake:
+
+```console
+git clone https://github.com/MOIS3Y/aladdin4nix.git
+cd aladdin4nix
+nix run
+```
+
+Build the package without starting it:
+
+```console
+nix build
+```
+
+The resulting executable is available at:
+
+```console
+./result/bin/aladdin-2fa-desktop
+```
+
+## Development
+
+Enter the development environment:
+
+```console
+nix develop
+```
+
+It provides `nixfmt`, `statix`, and `deadnix`. Run all project checks with:
+
+```console
+nixfmt --check default.nix flake.nix
+statix check .
+deadnix --fail .
+nix flake check
+```
+
+## About Aladdin 2FA
+
+[Aladdin 2FA][aladdin] provides PUSH and OTP authentication together with
+JaCarta Authentication Server. The desktop client allows users to work with
+their authenticators without installing the mobile application.
+
+This repository is an unofficial Nix package. The application itself is
+developed and distributed by Aladdin R.D.
+
+## Supported Platforms
+
+| Platform        | Support |
+| --------------- | ------- |
+| `x86_64-linux`  | Yes     |
+| `aarch64-linux` | No      |
+| macOS           | No      |
+
+Other architectures are not supported because upstream publishes only an
+x86_64 Linux binary and does not provide source code.
+
+## License
+
+The packaging code in this repository does not change the license of the
+upstream application. Aladdin 2FA Desktop is proprietary software and is
+marked as `unfree` in the Nix package metadata.
+
+[aladdin]: https://www.aladdin-rd.ru/catalog/aladdin-2fa/
+[flakes]: https://wiki.nixos.org/wiki/Flakes
