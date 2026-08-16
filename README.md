@@ -161,20 +161,8 @@ The resulting executable is available at:
 
 ## Development
 
-Enter the development environment:
-
-```console
-nix develop
-```
-
-It provides `nixfmt`, `statix`, and `deadnix`. Run all project checks with:
-
-```console
-nixfmt --check default.nix flake.nix
-statix check .
-deadnix --fail .
-nix flake check
-```
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the development environment,
+package architecture, release update procedure, and testing checklist.
 
 ## About Aladdin 2FA
 
