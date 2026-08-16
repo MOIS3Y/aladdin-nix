@@ -1,8 +1,8 @@
-# aladdin4nix
+# aladdin-nix
 
 **A ready-to-use Nix package for Aladdin 2FA Desktop on x86_64 Linux.**
 
-`aladdin4nix` repackages the official Aladdin 2FA Desktop application for
+`aladdin-nix` repackages the official Aladdin 2FA Desktop application for
 NixOS and other Linux distributions with the Nix package manager.
 
 <div align="center">
@@ -27,7 +27,7 @@ NixOS and other Linux distributions with the Nix package manager.
 Run Aladdin 2FA Desktop without installing it:
 
 ```console
-nix run github:MOIS3Y/aladdin4nix
+nix run github:MOIS3Y/aladdin-nix
 ```
 
 The package is downloaded, built, and started in one command. Nix reuses the
@@ -43,7 +43,7 @@ result from its store on subsequent runs.
 Install the application into your user profile:
 
 ```console
-nix profile add github:MOIS3Y/aladdin4nix
+nix profile add github:MOIS3Y/aladdin-nix
 ```
 
 After installation, start it from your application menu or terminal:
@@ -55,10 +55,10 @@ aladdin-2fa-desktop
 Remove the application from your profile with:
 
 ```console
-nix profile remove aladdin4nix
+nix profile remove aladdin-nix
 ```
 
-The profile entry is named `aladdin4nix`. You can confirm it with
+The profile entry is named `aladdin-nix`. You can confirm it with
 `nix profile list`.
 
 ### NixOS Flake
@@ -69,11 +69,11 @@ Add this repository to your flake inputs and include its default package:
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    aladdin4nix.url = "github:MOIS3Y/aladdin4nix";
+    aladdin-nix.url = "github:MOIS3Y/aladdin-nix";
   };
 
   outputs =
-    { nixpkgs, aladdin4nix, ... }:
+    { nixpkgs, aladdin-nix, ... }:
     let
       system = "x86_64-linux";
     in
@@ -84,7 +84,7 @@ Add this repository to your flake inputs and include its default package:
         modules = [
           {
             environment.systemPackages = [
-              aladdin4nix.packages.${system}.default
+              aladdin-nix.packages.${system}.default
             ];
           }
         ];
@@ -108,7 +108,7 @@ You can also build the package directly from a checked-out repository:
 
 {
   environment.systemPackages = [
-    (pkgs.callPackage /path/to/aladdin4nix/default.nix { })
+    (pkgs.callPackage /path/to/aladdin-nix/default.nix { })
   ];
 }
 ```
@@ -127,13 +127,13 @@ in the Nixpkgs instance used by your configuration:
 Update the installed profile package to the latest flake revision:
 
 ```console
-nix profile upgrade aladdin4nix
+nix profile upgrade aladdin-nix
 ```
 
 For a NixOS flake configuration, update its locked input and rebuild:
 
 ```console
-nix flake update aladdin4nix
+nix flake update aladdin-nix
 sudo nixos-rebuild switch --flake .#hostname
 ```
 
@@ -142,8 +142,8 @@ sudo nixos-rebuild switch --flake .#hostname
 Clone the repository and run the local flake:
 
 ```console
-git clone https://github.com/MOIS3Y/aladdin4nix.git
-cd aladdin4nix
+git clone https://github.com/MOIS3Y/aladdin-nix.git
+cd aladdin-nix
 nix run
 ```
 
